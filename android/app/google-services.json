@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "587708833164",
+    "project_id": "expatswap-task",
+    "storage_bucket": "expatswap-task.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587708833164:android:d805349467d5f9c8fbcaa9",
+        "android_client_info": {
+          "package_name": "com.expatswap.taskapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587708833164-kh3j1jick7usn02oe7fut7jphcn16n5h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuxffuGToKjU5yJWTxdjxceyNhhJxOFTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587708833164-kh3j1jick7usn02oe7fut7jphcn16n5h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "587708833164-albadikgs9kfo1nbb5pd41pihu6ng5p9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.expatswapTask"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
