@@ -7,7 +7,6 @@ class AccountDetails {
   static const colPhoneNumber = "phoneNumber";
   static const colDateOfBirth = "dateOfBirth";
   static const colAddress = "address";
-  static const colPassword = "password";
   static const colIsLoggedIn = "isLoggedIn";
   static const colIsVerified = "isVerified";
 
@@ -19,7 +18,6 @@ class AccountDetails {
     this.phoneNumber,
     this.dateOfBirth,
     this.address,
-    this.password,
     this.isLoggedIn,
     this.isVerified,
   });
@@ -32,7 +30,6 @@ class AccountDetails {
     phoneNumber = map[colPhoneNumber];
     dateOfBirth = map[colDateOfBirth];
     address = map[colAddress];
-    password = map[colPassword];
     isLoggedIn = map[colIsLoggedIn].toString() == 'true';
     isVerified = map[colIsVerified].toString() == 'true';
   }
@@ -43,7 +40,6 @@ class AccountDetails {
   String? phoneNumber;
   String? dateOfBirth;
   String? address;
-  String? password;
   bool? isLoggedIn;
   bool? isVerified;
 
@@ -55,7 +51,6 @@ class AccountDetails {
       colPhoneNumber: phoneNumber,
       colDateOfBirth: dateOfBirth,
       colAddress: address,
-      colPassword: password,
       colIsLoggedIn: isLoggedIn.toString(),
       colIsVerified: isVerified.toString(),
     };

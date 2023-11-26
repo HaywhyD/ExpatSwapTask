@@ -11,4 +11,5 @@ class Assets {
   static String errorImage = '$svgPath/error.svg';
   static String successImage = '$svgPath/success.svg';
   static String sentEmail = '$svgPath/sent-email.svg';
+  static String google = '$svgPath/google.svg';
 }

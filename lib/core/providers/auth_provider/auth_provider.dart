@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expatswap_task/core/model/account_details.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../data/database/database.dart';
 
@@ -21,6 +22,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isEmailVerified => _isEmailVerified;
   String _email = '';
   String get email => _email;
+  String _profilePic = '';
+  String get profilePic => _profilePic;
 
   /// login user
   Future<bool> login({required String email, required String password}) async {
@@ -33,28 +36,22 @@ class AuthProvider extends ChangeNotifier {
       if (response.user != null) {
         _details.email = response.user!.email;
         _details.isLoggedIn = true;
-        _details.password = password;
         _details.userId = response.user!.uid;
         _details.fullName = response.user!.displayName;
-        _details.address = '4, surulere Street';
-        _details.dateOfBirth = '2023-11-12';
-        _details.phoneNumber = '09036727573';
+        _details.address = _details.address ?? 'address';
+        _details.dateOfBirth = _details.dateOfBirth ?? 'date of Birth';
+        _details.phoneNumber = _details.phoneNumber ?? 'phone Number';
         _details.isVerified = response.user!.emailVerified;
         _isEmailVerified = response.user!.emailVerified;
         _isLoggedIn = true;
         _userId = response.user!.uid;
         _email = response.user!.email ?? '';
+        _profilePic = response.user!.photoURL ?? '';
         final getData = await _database.fetchAccountDetails();
         if (getData.isEmpty) {
           await _database.insertAccountDetails(_details);
         } else {
-          if (getData[0]['email'] != email) {
-            await _database.deleteTable();
-
-            await _database.insertAccountDetails(_details);
-          } else {
-            await _database.updateAccountDetails(_details);
-          }
+          await _database.updateAccountDetails(_details);
         }
       }
       _isLoading = false;
@@ -65,7 +62,72 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      print(e);
+      _isLoading = false;
+      notifyListeners();
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
+
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
+
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final auth = FirebaseAuth.instance;
+      final googleUser =
+          await GoogleSignIn(signInOption: SignInOption.standard).signIn();
+
+      final googleAuth = await googleUser?.authentication;
+
+      if (googleAuth != null) {
+        // Create a new credential
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Once signed in, return the UserCredential
+
+        final response = await auth.signInWithCredential(credential);
+        if (response.user != null) {
+          _details.email = response.user!.email;
+          _details.isLoggedIn = true;
+          _details.userId = response.user!.uid;
+          _details.fullName = response.user!.displayName ?? 'full Name';
+          _details.address = _details.address ?? 'address';
+          _details.dateOfBirth = _details.dateOfBirth ?? 'date of Birth';
+          _details.phoneNumber = _details.phoneNumber ?? 'phone Number';
+          _details.isVerified = response.user!.emailVerified;
+          _isEmailVerified = response.user!.emailVerified;
+          _isLoggedIn = true;
+          _userId = response.user!.uid;
+          _email = response.user!.email ?? '';
+          _profilePic = response.user!.photoURL ?? '';
+          final getData = await _database.fetchAccountDetails();
+          if (getData.isEmpty) {
+            await _database.insertAccountDetails(_details);
+          } else {
+            await _database.updateAccountDetails(_details);
+          }
+        }
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      if (auth.currentUser!.emailVerified) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
       _isLoading = false;
       notifyListeners();
       if (e is SocketException) {
@@ -101,7 +163,6 @@ class AuthProvider extends ChangeNotifier {
         await response.user!.updateDisplayName(fullName);
         _details.email = response.user!.email;
         _details.isLoggedIn = false;
-        _details.password = password;
         _details.userId = response.user!.uid;
         _details.fullName = fullName;
         _details.address = address;
@@ -109,7 +170,7 @@ class AuthProvider extends ChangeNotifier {
         _details.phoneNumber = phoneNumber;
         _details.isVerified = false;
         _isLoggedIn = false;
-
+        _profilePic = response.user!.photoURL ?? '';
         _email = response.user!.email ?? '';
         final getData = await _database.fetchAccountDetails();
         if (getData.isEmpty) {
@@ -150,7 +211,6 @@ class AuthProvider extends ChangeNotifier {
       final user = auth.currentUser!;
       _details.email = user.email;
       _details.isLoggedIn = false;
-      _details.password = _details.password;
       _details.userId = user.uid;
       _details.fullName = user.displayName;
       _details.address = _details.address;
@@ -181,13 +241,18 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> resetPassword({
     required String email,
   }) async {
+    _isLoading = true;
+    notifyListeners();
     try {
       final auth = FirebaseAuth.instance;
       await auth.sendPasswordResetEmail(email: email);
+      _isLoading = false;
 
       notifyListeners();
       return true;
     } catch (e) {
+      _isLoading = false;
+      notifyListeners();
       if (e is SocketException) {
         throw Exception(
             "Network error. Please check your internet connection.");
@@ -244,7 +309,6 @@ class AuthProvider extends ChangeNotifier {
       await user.updateDisplayName(fullName);
       _details.email = user.email;
       _details.isLoggedIn = true;
-      _details.password = _details.password;
       _details.userId = user.uid;
       _details.fullName = fullName;
       _details.address = address;
@@ -259,7 +323,6 @@ class AuthProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print(e);
       _isLoading = false;
 
       notifyListeners();

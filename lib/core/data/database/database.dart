@@ -47,7 +47,6 @@ CREATE TABLE ${AccountDetails.tblAccountDetails}(
   ${AccountDetails.colPhoneNumber} TEXT NOT NULL,
   ${AccountDetails.colDateOfBirth} TEXT NOT NULL,
   ${AccountDetails.colAddress} TEXT NOT NULL,
-  ${AccountDetails.colPassword} TEXT NOT NULL,
   ${AccountDetails.colIsLoggedIn} TEXT NOT NULL,
    ${AccountDetails.colIsVerified} TEXT NOT NULL
 )

@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_constructors, non_constant_identifier_names
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 MaterialColor buildMaterialColor(Color color) {
@@ -29,17 +29,17 @@ final ThemeData LightTheme = ThemeData(
   scaffoldBackgroundColor: const Color(0xFFEFEFEF),
   textTheme: TextTheme(
     displayLarge: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 24, fontWeight: FontWeight.w700),
+        color: Color(0xFF3C3C3C), fontSize: 24.sp, fontWeight: FontWeight.w700),
     displayMedium: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 20, fontWeight: FontWeight.w700),
+        color: Color(0xFF3C3C3C), fontSize: 20.sp, fontWeight: FontWeight.w700),
     displaySmall: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 18, fontWeight: FontWeight.w700),
+        color: Color(0xFF3C3C3C), fontSize: 18.sp, fontWeight: FontWeight.w700),
     bodyLarge: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 16, fontWeight: FontWeight.w500),
+        color: Color(0xFF3C3C3C), fontSize: 16.sp, fontWeight: FontWeight.w500),
     bodyMedium: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 14, fontWeight: FontWeight.w500),
+        color: Color(0xFF3C3C3C), fontSize: 14.sp, fontWeight: FontWeight.w500),
     bodySmall: GoogleFonts.poppins(
-        color: Color(0xFF3C3C3C), fontSize: 12, fontWeight: FontWeight.w500),
+        color: Color(0xFF3C3C3C), fontSize: 12.sp, fontWeight: FontWeight.w500),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
@@ -64,19 +64,21 @@ final ThemeData LightTheme = ThemeData(
           if (states.contains(MaterialState.disabled)) {
             return GoogleFonts.poppins(
                 color: Colors.white54,
-                fontSize: 16.0,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600);
           }
           return GoogleFonts.poppins(
-              color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.w600);
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600);
         },
       ),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10.r),
         ),
       ),
-      minimumSize: MaterialStateProperty.all(Size(double.infinity, 60.0)),
+      minimumSize: MaterialStateProperty.all(Size(double.infinity, 60.h)),
       elevation: MaterialStateProperty.all(0.0),
     ),
   ),
@@ -89,12 +91,12 @@ final ThemeData LightTheme = ThemeData(
     textStyle: MaterialStateProperty.all(
       GoogleFonts.poppins(
           color: Color(0xFF14394B),
-          fontSize: 16.0,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w600),
     ),
     shape: MaterialStateProperty.all(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32.0),
+        borderRadius: BorderRadius.circular(10.r),
       ),
     ),
     side: MaterialStateProperty.all(
@@ -102,12 +104,12 @@ final ThemeData LightTheme = ThemeData(
         color: Color(0xFF14394B),
       ),
     ),
-    minimumSize: MaterialStateProperty.all(Size(double.infinity, 50.0)),
+    minimumSize: MaterialStateProperty.all(Size(double.infinity, 50.h)),
   )),
   checkboxTheme: CheckboxThemeData(
     side: BorderSide(color: Colors.grey),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(4.0),
+      borderRadius: BorderRadius.circular(4.r),
     ),
   ),
   visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -118,23 +120,23 @@ final ThemeData DarkTheme = ThemeData(
   primaryColor: Color(0xFF14394B),
   textTheme: TextTheme(
     displayLarge: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 24, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 24.sp, fontWeight: FontWeight.w700),
     displayMedium: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 20, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 20.sp, fontWeight: FontWeight.w700),
     displaySmall: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 18, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 18.sp, fontWeight: FontWeight.w700),
     headlineLarge: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 24, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 24.sp, fontWeight: FontWeight.w700),
     headlineMedium: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 20, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 20.sp, fontWeight: FontWeight.w700),
     headlineSmall: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 16, fontWeight: FontWeight.w700),
+        color: Color(0xFFE3E3E3), fontSize: 16.sp, fontWeight: FontWeight.w700),
     bodyLarge: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 16, fontWeight: FontWeight.w500),
+        color: Color(0xFFE3E3E3), fontSize: 16.sp, fontWeight: FontWeight.w500),
     bodyMedium: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 14, fontWeight: FontWeight.w500),
+        color: Color(0xFFE3E3E3), fontSize: 14.sp, fontWeight: FontWeight.w500),
     bodySmall: GoogleFonts.poppins(
-        color: Color(0xFFE3E3E3), fontSize: 12, fontWeight: FontWeight.w500),
+        color: Color(0xFFE3E3E3), fontSize: 12.sp, fontWeight: FontWeight.w500),
   ),
   scaffoldBackgroundColor: const Color(0xFF111111),
   colorScheme: const ColorScheme.light(
@@ -164,16 +166,18 @@ final ThemeData DarkTheme = ThemeData(
           if (states.contains(MaterialState.disabled)) {
             return GoogleFonts.poppins(
                 color: Colors.white54,
-                fontSize: 16.0,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600);
           }
           return GoogleFonts.poppins(
-              color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.w600);
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600);
         },
       ),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10.r),
         ),
       ),
       minimumSize: MaterialStateProperty.all(Size(double.infinity, 60.0)),
@@ -188,11 +192,11 @@ final ThemeData DarkTheme = ThemeData(
     backgroundColor: MaterialStateProperty.all(Colors.transparent),
     textStyle: MaterialStateProperty.all(
       GoogleFonts.poppins(
-          color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.w600),
+          color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w600),
     ),
     shape: MaterialStateProperty.all(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32.0),
+        borderRadius: BorderRadius.circular(10.r),
       ),
     ),
     side: MaterialStateProperty.all(
@@ -200,12 +204,12 @@ final ThemeData DarkTheme = ThemeData(
         color: Color(0xFF14394B),
       ),
     ),
-    minimumSize: MaterialStateProperty.all(Size(double.infinity, 50.0)),
+    minimumSize: MaterialStateProperty.all(Size(double.infinity, 50..h)),
   )),
   checkboxTheme: CheckboxThemeData(
     side: BorderSide(color: Colors.grey),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(4.0),
+      borderRadius: BorderRadius.circular(4.r),
     ),
   ),
   brightness: Brightness.dark,

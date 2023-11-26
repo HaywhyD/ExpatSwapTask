@@ -117,12 +117,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.white,
                                   width: 2,
                                 ),
-                                image: const DecorationImage(
-                                  image: AssetImage(
-                                    "assets/icon/icon.png",
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
+                                image: context
+                                        .read<AuthProvider>()
+                                        .profilePic
+                                        .isEmpty
+                                    ? const DecorationImage(
+                                        image: AssetImage(
+                                          "assets/icon/icon.png",
+                                        ),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : DecorationImage(
+                                        image: NetworkImage(
+                                          context
+                                              .read<AuthProvider>()
+                                              .profilePic,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
                             SizedBox(
@@ -283,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const Duration(
             milliseconds: 1000,
           ),
-          () => context.push(LoginScreen.path),
+          () => context.go(LoginScreen.path),
         );
       } on Exception catch (e) {
         showError(e.toString());

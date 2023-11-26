@@ -3,6 +3,7 @@ import 'package:expatswap_task/ui/screens/home/home_screen.dart';
 import 'package:expatswap_task/ui/screens/verification/verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -198,6 +199,45 @@ class _LoginScreenState extends State<LoginScreen> {
                           : const Text('Login'),
                     ),
                     SizedBox(
+                      height: 15.h,
+                    ),
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('or'),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15.h,
+                    ),
+                    OutlinedButton(
+                      onPressed:
+                          authProvider.isLoading ? null : _loginWithGoogle,
+                      child: authProvider.isLoading
+                          ? const SizedBox(
+                              width: 24.0,
+                              height: 24.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                                color: Colors.white,
+                              ))
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                    height: 25.h,
+                                    width: 25.h,
+                                    child: SvgPicture.asset(Assets.google)),
+                                SizedBox(
+                                  width: 10.w,
+                                ),
+                                const Text('Sign in with Google'),
+                              ],
+                            ),
+                    ),
+                    SizedBox(
                       height: 40.sp,
                     ),
                     Align(
@@ -248,6 +288,20 @@ class _LoginScreenState extends State<LoginScreen> {
       } on Exception catch (e) {
         showError(e.toString());
       }
+    }
+  }
+
+  _loginWithGoogle() async {
+    try {
+      final isVerified = await context.read<AuthProvider>().loginWithGoogle();
+
+      if (isVerified) {
+        navigateToHome();
+      } else {
+        navigateToVerification();
+      }
+    } on Exception catch (e) {
+      showError(e.toString());
     }
   }
 
