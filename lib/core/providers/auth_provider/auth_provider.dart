@@ -14,7 +14,6 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isEmailVerified = false;
   AccountDetails _details = AccountDetails();
-  final LocalDatabase _database = LocalDatabase.instance;
   bool get isLoggedIn => _isLoggedIn;
   String get userId => _userId;
   AccountDetails get details => _details;
@@ -30,6 +29,7 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final response = await auth.signInWithEmailAndPassword(
           email: email, password: password);
@@ -47,11 +47,11 @@ class AuthProvider extends ChangeNotifier {
         _userId = response.user!.uid;
         _email = response.user!.email ?? '';
         _profilePic = response.user!.photoURL ?? '';
-        final getData = await _database.fetchAccountDetails();
+        final getData = await database.fetchAccountDetails();
         if (getData.isEmpty) {
-          await _database.insertAccountDetails(_details);
+          await database.insertAccountDetails(_details);
         } else {
-          await _database.updateAccountDetails(_details);
+          await database.updateAccountDetails(_details);
         }
       }
       _isLoading = false;
@@ -81,6 +81,7 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final googleUser =
           await GoogleSignIn(signInOption: SignInOption.standard).signIn();
@@ -111,11 +112,11 @@ class AuthProvider extends ChangeNotifier {
           _userId = response.user!.uid;
           _email = response.user!.email ?? '';
           _profilePic = response.user!.photoURL ?? '';
-          final getData = await _database.fetchAccountDetails();
+          final getData = await database.fetchAccountDetails();
           if (getData.isEmpty) {
-            await _database.insertAccountDetails(_details);
+            await database.insertAccountDetails(_details);
           } else {
-            await _database.updateAccountDetails(_details);
+            await database.updateAccountDetails(_details);
           }
         }
       }
@@ -155,6 +156,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final response = await auth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -172,17 +174,11 @@ class AuthProvider extends ChangeNotifier {
         _isLoggedIn = false;
         _profilePic = response.user!.photoURL ?? '';
         _email = response.user!.email ?? '';
-        final getData = await _database.fetchAccountDetails();
+        final getData = await database.fetchAccountDetails();
         if (getData.isEmpty) {
-          await _database.insertAccountDetails(_details);
+          await database.insertAccountDetails(_details);
         } else {
-          if (getData[0]['email'] != email) {
-            await _database.deleteTable();
-
-            await _database.insertAccountDetails(_details);
-          } else {
-            await _database.updateAccountDetails(_details);
-          }
+          await database.updateAccountDetails(_details);
         }
 
         // Authentication failed
@@ -207,6 +203,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> logout() async {
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final user = auth.currentUser!;
       _details.email = user.email;
@@ -216,12 +213,47 @@ class AuthProvider extends ChangeNotifier {
       _details.address = _details.address;
       _details.dateOfBirth = _details.dateOfBirth;
       _details.phoneNumber = _details.phoneNumber;
-      _details.isVerified = false;
-      final getData = await _database.fetchAccountDetails();
+      _details.isVerified = _details.isVerified;
+      final getData = await database.fetchAccountDetails();
       if (getData.isNotEmpty) {
-        await _database.updateAccountDetails(_details);
+        await database.updateAccountDetails(_details);
       }
       await auth.signOut();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
+
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      final LocalDatabase database = LocalDatabase.instance;
+      final auth = FirebaseAuth.instance;
+      final user = auth.currentUser!;
+      await user.delete();
+      await auth.signOut();
+      _details.email = user.email;
+      _details.isLoggedIn = false;
+      _details.userId = user.uid;
+      _details.fullName = user.displayName;
+      _details.address = _details.address;
+      _details.dateOfBirth = _details.dateOfBirth;
+      _details.phoneNumber = _details.phoneNumber;
+      _details.isVerified = false;
+      final getData = await database.fetchAccountDetails();
+      if (getData.isNotEmpty) {
+        await database.updateAccountDetails(_details);
+      }
       notifyListeners();
       return true;
     } catch (e) {
@@ -270,16 +302,35 @@ class AuthProvider extends ChangeNotifier {
     required String email,
   }) async {
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final user = auth.currentUser!;
-      await auth.currentUser!.sendEmailVerification();
-      Timer.periodic(const Duration(seconds: 4), (timer) async {
-        await user.reload();
-        if (user.emailVerified) {
+      await user.sendEmailVerification();
+      Timer.periodic(const Duration(seconds: 5), (timer) async {
+        final newAuth = FirebaseAuth.instance;
+        final newUser = newAuth.currentUser!;
+        await newUser.reload();
+        if (newUser.emailVerified) {
           timer.cancel();
           _isEmailVerified = true;
         }
       });
+      _details.email = user.email;
+      _details.isLoggedIn = true;
+      _details.userId = user.uid;
+      _details.fullName = user.displayName ?? 'full Name';
+      _details.address = _details.address ?? 'address';
+      _details.dateOfBirth = _details.dateOfBirth ?? 'date of Birth';
+      _details.phoneNumber = _details.phoneNumber ?? 'phone Number';
+      _details.isVerified = user.emailVerified;
+      _isEmailVerified = user.emailVerified;
+      _isLoggedIn = true;
+      final getData = await database.fetchAccountDetails();
+      if (getData.isEmpty) {
+        await database.insertAccountDetails(_details);
+      } else {
+        await database.updateAccountDetails(_details);
+      }
       notifyListeners();
     } catch (e) {
       if (e is SocketException) {
@@ -304,6 +355,7 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
+      final LocalDatabase database = LocalDatabase.instance;
       final auth = FirebaseAuth.instance;
       final user = auth.currentUser!;
       await user.updateDisplayName(fullName);
@@ -315,9 +367,9 @@ class AuthProvider extends ChangeNotifier {
       _details.dateOfBirth = dateOfBirth;
       _details.phoneNumber = phoneNumber;
       _details.isVerified = true;
-      final getData = await _database.fetchAccountDetails();
+      final getData = await database.fetchAccountDetails();
       if (getData.isNotEmpty) {
-        await _database.updateAccountDetails(_details);
+        await database.updateAccountDetails(_details);
       }
       _isLoading = false;
 

@@ -254,21 +254,42 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const Text('Edit Profile'),
                       ),
                       SizedBox(
-                        height: 20.h,
+                        height: 25.h,
                       ),
                       Align(
                         alignment: Alignment.center,
-                        child: InkWell(
-                          onTap: _logout,
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Logout',
-                              style: LightTheme.textTheme.bodyMedium!.copyWith(
-                                color: AppColor.primaryColor,
+                        child: Column(
+                          children: [
+                            InkWell(
+                              onTap: _logout,
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Logout',
+                                  style:
+                                      LightTheme.textTheme.bodyLarge!.copyWith(
+                                    color: AppColor.primaryColor,
+                                  ),
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
+                            SizedBox(
+                              height: 20.h,
+                            ),
+                            InkWell(
+                              onTap: _deleteData,
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Delete Account',
+                                  style:
+                                      LightTheme.textTheme.bodyMedium!.copyWith(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(
@@ -288,19 +309,55 @@ class _HomeScreenState extends State<HomeScreen> {
   _logout() async {
     final form = _formKey.currentState;
     if (form!.validate()) {
-      try {
-        await context.read<AuthProvider>().logout();
-        await showSuccess('Logout Successful, click ok to continue');
-        Future.delayed(
-          const Duration(
-            milliseconds: 1000,
-          ),
-          () => context.go(LoginScreen.path),
-        );
-      } on Exception catch (e) {
-        showError(e.toString());
-      }
+      showExpatConfirmationDialog(
+        context: context,
+        content: 'Are you sure you want to logout?',
+        onConfirm: () async {
+          try {
+            await context.read<AuthProvider>().logout();
+            await showSuccess('Logout Successful, click ok to continue');
+            removeListener();
+            Future.delayed(
+              const Duration(
+                milliseconds: 1000,
+              ),
+              () => context.go(LoginScreen.path),
+            );
+          } on Exception catch (e) {
+            showError(e.toString());
+          }
+        },
+        onCancel: () => context.pop(),
+      );
     }
+  }
+
+  _deleteData() async {
+    showExpatConfirmationDialog(
+      context: context,
+      content: 'Are you sure you want to delete your account?',
+      onConfirm: () async {
+        try {
+          await context.read<AuthProvider>().deleteAccount();
+          await showSuccess('Account deleted successfully');
+          Future.delayed(
+            const Duration(
+              milliseconds: 1000,
+            ),
+            () => context.go(LoginScreen.path),
+          );
+          removeListener();
+        } on Exception catch (e) {
+          showError(e.toString());
+        }
+      },
+      onCancel: () => context.pop(),
+    );
+  }
+
+  removeListener() async {
+    Provider.of<AuthProvider>(context).dispose();
+    Provider.of<AuthProvider>(context).removeListener(() {});
   }
 
   showError(String e) {

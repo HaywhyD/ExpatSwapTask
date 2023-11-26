@@ -30,18 +30,24 @@ class _VerificationScreenState extends State<VerificationScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 1), () {
-      verifyEmail();
+      if (mounted) {
+        verifyEmail();
+      }
     });
   }
 
   verifyEmail() async {
-    final authProvider = context.watch<AuthProvider>();
+    final authProvider = context.read<AuthProvider>();
 
     try {
       await authProvider.verifyEmail(email: authProvider.email);
-      if (authProvider.isEmailVerified) {
-        navigateToHome();
-      }
+      // ignore: use_build_context_synchronously
+      Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (authProvider.isEmailVerified) {
+          timer.cancel();
+          navigateToHome();
+        }
+      });
     } on Exception catch (e) {
       showError(e.toString());
     }
@@ -61,7 +67,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = context.read<AuthProvider>();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SizedBox(
