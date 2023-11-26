@@ -1,51 +1,54 @@
+import 'package:expatswap_task/core/model/account_details.dart';
 import 'package:expatswap_task/core/providers/auth_provider/auth_provider.dart';
-import 'package:expatswap_task/ui/screens/login/login_screen.dart';
-import 'package:expatswap_task/ui/screens/verification/verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/functions/functions.dart';
-import '../../common/colors.dart';
 import '../../common/text_field.dart';
 import '../../common/widgets.dart';
-import '../../theme/theme.dart';
-import 'package:email_validator/email_validator.dart';
 
-class RegisterScreen extends StatefulWidget {
-  static const String name = 'register-screen';
-  static const String path = '/register-screen';
-  const RegisterScreen({super.key});
+class EditProfileScreen extends StatefulWidget {
+  static const String name = 'edit-profile-screen';
+  static const String path = '/edit-profile-screen';
+  const EditProfileScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _dateOfBirthController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNoController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool isShowPasswordChecked = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
     _addressController.dispose();
     _dateOfBirthController.dispose();
     _fullNameController.dispose();
     _phoneNoController.dispose();
-    _confirmPasswordController.dispose();
 
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateAccountDetails();
+  }
+
+  updateAccountDetails() {
+    final AccountDetails accountDetails = context.read<AuthProvider>().details;
+    setState(() {
+      _fullNameController.text = accountDetails.fullName ?? '';
+      _phoneNoController.text = accountDetails.phoneNumber ?? '';
+      _dateOfBirthController.text = accountDetails.dateOfBirth ?? '';
+      _addressController.text = accountDetails.address ?? '';
+    });
   }
 
   @override
@@ -68,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Register',
+                      'Edit Profile',
                       style: GoogleFonts.poppins(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
@@ -100,35 +103,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         size: 16.sp,
                       ),
                       keyboardType: TextInputType.name,
-                    ),
-                    SizedBox(
-                      height: 15.h,
-                    ),
-                    const Text('Email Address'),
-                    SizedBox(
-                      height: 6.h,
-                    ),
-                    ExpatTextField(
-                      hint: 'example@email.com',
-                      textEditingController: _emailController,
-                      textInputAction: TextInputAction.next,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Required field';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Enter a valid email';
-                        }
-                        return null;
-                      },
-                      onClickSuffixIcon: () {
-                        _emailController.text = '';
-                      },
-                      suffixIcon: Icon(
-                        Icons.close,
-                        size: 16.sp,
-                      ),
-                      keyboardType: TextInputType.emailAddress,
                     ),
                     SizedBox(
                       height: 15.h,
@@ -219,91 +193,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.streetAddress,
                     ),
                     SizedBox(
-                      height: 15.h,
-                    ),
-                    const Text('Password'),
-                    SizedBox(
-                      height: 6.h,
-                    ),
-                    ExpatTextField(
-                      hint: 'Enter your password',
-                      textEditingController: _passwordController,
-                      textInputAction: TextInputAction.done,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Required field';
-                        } else if (value.length < 6) {
-                          return 'Password too short';
-                        }
-                        return null;
-                      },
-                      onClickSuffixIcon: () {
-                        _passwordController.text = '';
-                      },
-                      maxLines: 1,
-                      obscureText: isShowPasswordChecked,
-                      suffixIcon: Icon(
-                        Icons.close,
-                        size: 16.sp,
-                      ),
-                      keyboardType: TextInputType.visiblePassword,
-                    ),
-                    SizedBox(
-                      height: 15.h,
-                    ),
-                    const Text('Confirm Password'),
-                    SizedBox(
-                      height: 6.h,
-                    ),
-                    ExpatTextField(
-                      hint: 'Confirm password',
-                      textEditingController: _confirmPasswordController,
-                      textInputAction: TextInputAction.next,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Required field';
-                        } else if (value != _passwordController.text) {
-                          return 'Password do not match';
-                        }
-                        return null;
-                      },
-                      maxLines: 1,
-                      obscureText: isShowPasswordChecked,
-                      onClickSuffixIcon: () {
-                        _confirmPasswordController.text = '';
-                      },
-                      suffixIcon: Icon(
-                        Icons.close,
-                        size: 16.sp,
-                      ),
-                      keyboardType: TextInputType.visiblePassword,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: !isShowPasswordChecked,
-                              onChanged: (value) {
-                                setState(() {
-                                  isShowPasswordChecked =
-                                      !isShowPasswordChecked;
-                                });
-                              },
-                            ),
-                            const Text('Show Password'),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(
                       height: 20.h,
                     ),
                     ButtonWidget(
-                      onPressed: authProvider.isLoading ? null : _register,
+                      onPressed: authProvider.isLoading ? null : _editProfile,
                       child: authProvider.isLoading
                           ? const SizedBox(
                               width: 24.0,
@@ -312,35 +205,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 strokeWidth: 3.0,
                                 color: Colors.white,
                               ))
-                          : const Text('Register'),
+                          : const Text('Update Profile'),
                     ),
                     SizedBox(
                       height: 20.h,
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: InkWell(
-                        onTap: () => context.pushReplacement(LoginScreen.path),
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Already have an account? ',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: 'Login',
-                                style:
-                                    LightTheme.textTheme.bodyMedium!.copyWith(
-                                  color: AppColor.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20.sp,
                     ),
                   ],
                 ),
@@ -352,24 +220,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  _register() async {
+  _editProfile() async {
     final form = _formKey.currentState;
     if (form!.validate()) {
       try {
-        await context.read<AuthProvider>().signUp(
-            email: _emailController.text,
+        await context.read<AuthProvider>().editProfile(
             fullName: _fullNameController.text,
-            password: _passwordController.text,
             phoneNumber: _phoneNoController.text,
             address: _addressController.text,
             dateOfBirth: _dateOfBirthController.text);
-        await showSuccess('Sign Up Successful. Click ok to verify email.');
-        Future.delayed(
-          const Duration(
-            milliseconds: 1000,
-          ),
-          () => context.push(VerificationScreen.path),
-        );
+        await showSuccess('Profile Successfully Updated');
       } on Exception catch (e) {
         showError(e.toString());
       }

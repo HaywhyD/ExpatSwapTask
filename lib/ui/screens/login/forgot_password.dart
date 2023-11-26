@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:provider/provider.dart';
 import '../../../core/assets/assets.dart';
+import '../../../core/providers/auth_provider/auth_provider.dart';
 import '../../common/text_field.dart';
+import '../../common/widgets.dart';
 
 class ForgotPassword extends StatefulWidget {
   static const String name = 'forgot-password';
@@ -31,10 +33,22 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset(
-                Assets.icon,
-                height: 67.h,
-                width: 67.w,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 67.h,
+                    width: 67.w,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: AssetImage(Assets.icon),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(
                 height: 32.h,
@@ -112,8 +126,26 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
-  void _resetPassword() {
+  void _resetPassword() async {
     final form = _formKey.currentState;
-    if (form?.validate() == true) {}
+    if (form?.validate() == true) {
+      try {
+        await context
+            .read<AuthProvider>()
+            .resetPassword(email: _emailController.text);
+        showSuccess(
+            'A password Reset Email has been sent to your email address');
+      } on Exception catch (e) {
+        showError(e.toString());
+      }
+    }
+  }
+
+  showError(String e) {
+    showExpatErrorDialog(context, e.toString().split(':')[1]);
+  }
+
+  showSuccess(String message) {
+    showExpatSuccessDialog(context, message);
   }
 }

@@ -42,14 +42,14 @@ class LocalDatabase {
 CREATE TABLE ${AccountDetails.tblAccountDetails}(
   ${AccountDetails.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
   ${AccountDetails.colUserId} TEXT NOT NULL,
-  ${AccountDetails.colFirstName} TEXT NOT NULL,
-  ${AccountDetails.colLastName} TEXT NOT NULL,
+  ${AccountDetails.colFullName} TEXT NOT NULL,
   ${AccountDetails.colEmail} TEXT NOT NULL,
   ${AccountDetails.colPhoneNumber} TEXT NOT NULL,
   ${AccountDetails.colDateOfBirth} TEXT NOT NULL,
   ${AccountDetails.colAddress} TEXT NOT NULL,
   ${AccountDetails.colPassword} TEXT NOT NULL,
   ${AccountDetails.colIsLoggedIn} TEXT NOT NULL,
+   ${AccountDetails.colIsVerified} TEXT NOT NULL
 )
 ''');
   }

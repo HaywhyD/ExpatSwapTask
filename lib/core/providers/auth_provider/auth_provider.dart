@@ -1,136 +1,283 @@
-// import 'dart:io';
-// import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:expatswap_task/core/model/account_details.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
-// /// provider for the authentication states
-// class AuthProvider extends ChangeNotifier {
-//   bool _isLoggedIn = false;
-//   String _userToken = '';
-//   String _userId = '';
+import '../../data/database/database.dart';
 
-//   final Details _details = Details();
-//   LocalDatabase _database = LocalDatabase.instance;
+/// provider for the authentication states
+class AuthProvider extends ChangeNotifier {
+  bool _isLoggedIn = false;
+  String _userId = '';
+  bool _isLoading = false;
+  bool _isEmailVerified = false;
+  AccountDetails _details = AccountDetails();
+  final LocalDatabase _database = LocalDatabase.instance;
+  bool get isLoggedIn => _isLoggedIn;
+  String get userId => _userId;
+  AccountDetails get details => _details;
+  bool get isLoading => _isLoading;
+  bool get isEmailVerified => _isEmailVerified;
+  String _email = '';
+  String get email => _email;
 
-//   bool get isLoggedIn => _isLoggedIn;
-//   String get userToken => _userToken;
-//   String get userId => _userId;
+  /// login user
+  Future<bool> login({required String email, required String password}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final auth = FirebaseAuth.instance;
+      final response = await auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      if (response.user != null) {
+        _details.email = response.user!.email;
+        _details.isLoggedIn = true;
+        _details.password = password;
+        _details.userId = response.user!.uid;
+        _details.fullName = response.user!.displayName;
+        _details.address = '4, surulere Street';
+        _details.dateOfBirth = '2023-11-12';
+        _details.phoneNumber = '09036727573';
+        _details.isVerified = response.user!.emailVerified;
+        _isEmailVerified = response.user!.emailVerified;
+        _isLoggedIn = true;
+        _userId = response.user!.uid;
+        _email = response.user!.email ?? '';
+        final getData = await _database.fetchAccountDetails();
+        if (getData.isEmpty) {
+          await _database.insertAccountDetails(_details);
+        } else {
+          if (getData[0]['email'] != email) {
+            await _database.deleteTable();
 
-//   /// login user
-//   Future<void> login({required String email, required String password}) async {
-//     try {
-//       final auth = Authentication();
-//       final response = await auth.signIn(email, password);
-//       if (response != null) {
-//         _details.email = response.email;
-//         _details.isLoggedIn = true;
-//         _details.password = password;
-//         _details.userId = response.id;
-//         _details.credits = response.credits;
-//         _details.token = response.cookie.toString().split(';')[0];
-//         _details.name = response.name.toString().replaceAll('_', ' ');
-//         _isLoggedIn = _details.isLoggedIn!;
-//         _userToken = _details.token!;
-//         final getData = await _database.fetchDetails();
-//         if (getData.isEmpty) {
-//           await _database.insertDetails(_details);
+            await _database.insertAccountDetails(_details);
+          } else {
+            await _database.updateAccountDetails(_details);
+          }
+        }
+      }
+      _isLoading = false;
+      notifyListeners();
+      if (auth.currentUser!.emailVerified) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      _isLoading = false;
+      notifyListeners();
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
 
-//           notifyListeners();
-//         } else {
-//           if (getData[0]['email'] != email) {
-//             await _database.deleteTable();
-//             _database = LocalDatabase.instance;
-//             await _database.insertDetails(_details);
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
 
-//             notifyListeners();
-//           } else {
-//             await _database.updateDetails(_details);
+  Future<void> signUp({
+    required String email,
+    required String fullName,
+    required String password,
+    required String phoneNumber,
+    required String address,
+    required String dateOfBirth,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
 
-//             notifyListeners();
-//           }
-//         }
+    try {
+      final auth = FirebaseAuth.instance;
+      final response = await auth.createUserWithEmailAndPassword(
+          email: email, password: password);
 
-//         _userToken = _details.token!;
-//         _userId = _details.userId!;
-//         notifyListeners();
-//       } else {
-//         // Authentication failed
-//         throw Exception(
-//             "Authentication failed. Check your email and password.");
-//       }
-//     } catch (e) {
-//       if (e is SocketException) {
-//         throw Exception(
-//             "Network error. Please check your internet connection.");
-//       } else if (e is ApiException) {
-//       } else {
-//         // Handle other unexpected errors
+      if (response.user != null) {
+        await response.user!.updateDisplayName(fullName);
+        _details.email = response.user!.email;
+        _details.isLoggedIn = false;
+        _details.password = password;
+        _details.userId = response.user!.uid;
+        _details.fullName = fullName;
+        _details.address = address;
+        _details.dateOfBirth = dateOfBirth;
+        _details.phoneNumber = phoneNumber;
+        _details.isVerified = false;
+        _isLoggedIn = false;
 
-//         throw Exception("An unexpected error occurred.");
-//       }
-//     }
-//     notifyListeners();
-//   }
+        _email = response.user!.email ?? '';
+        final getData = await _database.fetchAccountDetails();
+        if (getData.isEmpty) {
+          await _database.insertAccountDetails(_details);
+        } else {
+          if (getData[0]['email'] != email) {
+            await _database.deleteTable();
 
-//   Future<void> signUp({
-//     required String email,
-//     required String name,
-//     required String password,
-//   }) async {
-//     try {
-//       final auth = Authentication();
-//       final response = await auth.signUp(
-//         email,
-//         name,
-//         password,
-//       );
+            await _database.insertAccountDetails(_details);
+          } else {
+            await _database.updateAccountDetails(_details);
+          }
+        }
 
-//       if (response != null) {
-//         _isLoggedIn = true;
-//         // Authentication failed
-//       } else {
-//         throw Exception("SignUp failed. Check your email and password.");
-//       }
-//     } catch (e) {
-//       if (e is SocketException) {
-//         throw Exception(
-//             "Network error. Please check your internet connection.");
-//       } else if (e is ApiException) {
-//       } else {
-//         // Handle other unexpected errors
+        // Authentication failed
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
 
-//         throw Exception("An unexpected error occurred.");
-//       }
-//     }
-//     notifyListeners();
-//   }
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
 
-//   Future<void> logout({
-//     required String email,
-//   }) async {
-//     try {
-//       final auth = Authentication();
-//       final response = await auth.logout(
-//         email,
-//       );
+  Future<bool> logout() async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final user = auth.currentUser!;
+      _details.email = user.email;
+      _details.isLoggedIn = false;
+      _details.password = _details.password;
+      _details.userId = user.uid;
+      _details.fullName = user.displayName;
+      _details.address = _details.address;
+      _details.dateOfBirth = _details.dateOfBirth;
+      _details.phoneNumber = _details.phoneNumber;
+      _details.isVerified = false;
+      final getData = await _database.fetchAccountDetails();
+      if (getData.isNotEmpty) {
+        await _database.updateAccountDetails(_details);
+      }
+      await auth.signOut();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
 
-//       if (response != null) {
-//         _isLoggedIn = false;
-//         await _database.updateColumn('loggedIn', 'false');
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
 
-//         // logout failed
-//       } else {
-//         throw Exception("Logout failed");
-//       }
-//     } catch (e) {
-//       if (e is SocketException) {
-//         throw Exception(
-//             "Network error. Please check your internet connection.");
-//       } else if (e is ApiException) {
-//       } else {
-//         // Handle other unexpected errors
+  Future<bool> resetPassword({
+    required String email,
+  }) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      await auth.sendPasswordResetEmail(email: email);
 
-//         throw Exception("An unexpected error occurred.");
-//       }
-//     }
-//     notifyListeners();
-//   }
-// }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
+
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
+
+  Future<void> verifyEmail({
+    required String email,
+  }) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final user = auth.currentUser!;
+      await auth.currentUser!.sendEmailVerification();
+      Timer.periodic(const Duration(seconds: 4), (timer) async {
+        await user.reload();
+        if (user.emailVerified) {
+          timer.cancel();
+          _isEmailVerified = true;
+        }
+      });
+      notifyListeners();
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
+
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
+
+  Future<void> editProfile({
+    required String fullName,
+    required String phoneNumber,
+    required String address,
+    required String dateOfBirth,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final auth = FirebaseAuth.instance;
+      final user = auth.currentUser!;
+      await user.updateDisplayName(fullName);
+      _details.email = user.email;
+      _details.isLoggedIn = true;
+      _details.password = _details.password;
+      _details.userId = user.uid;
+      _details.fullName = fullName;
+      _details.address = address;
+      _details.dateOfBirth = dateOfBirth;
+      _details.phoneNumber = phoneNumber;
+      _details.isVerified = true;
+      final getData = await _database.fetchAccountDetails();
+      if (getData.isNotEmpty) {
+        await _database.updateAccountDetails(_details);
+      }
+      _isLoading = false;
+
+      notifyListeners();
+    } catch (e) {
+      print(e);
+      _isLoading = false;
+
+      notifyListeners();
+      if (e is SocketException) {
+        throw Exception(
+            "Network error. Please check your internet connection.");
+      } else if (e is FirebaseAuthException) {
+        throw Exception(e.message);
+      } else {
+        // Handle other unexpected errors
+
+        throw Exception("An unexpected error occurred.");
+      }
+    }
+  }
+
+  updateDetails(AccountDetails details) {
+    _details = details;
+    notifyListeners();
+  }
+}

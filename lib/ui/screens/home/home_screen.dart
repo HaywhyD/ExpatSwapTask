@@ -1,11 +1,20 @@
+import 'package:expatswap_task/core/model/account_details.dart';
+import 'package:expatswap_task/core/providers/auth_provider/auth_provider.dart';
+import 'package:expatswap_task/ui/screens/login/login_screen.dart';
+import 'package:expatswap_task/ui/screens/profile/edit_profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import '../../../main.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../common/colors.dart';
+import '../../common/text_field.dart';
+import '../../common/widgets.dart';
+import '../../theme/theme.dart';
 
 class HomeScreen extends StatefulWidget {
-  static const String name = 'home-screen';
-  static const String path = '/home-screen';
+  static const String name = 'agent-register-screen';
+  static const String path = '/agent-register-screen';
   const HomeScreen({super.key});
 
   @override
@@ -13,1299 +22,280 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isAgreed = false;
-  String _fullName = 'Oreoluwa Adejumo';
-  String _slackName = 'Mavipop';
-  String _githubHandle = 'HaywhyD';
-  String _bio =
-      'Determined Mobile Developer offering more than 2 years of expertise in fast-paced departments. Bilingual and well-spoken with the ability to work closely with people of all different backgrounds and personalities. Seeking an opportunity to oversee a team of exceptional in a well established company.';
-  final String _track = 'Mobile Track';
-  String _skills = 'Flutter, Swift, Kotlin, WordPress, HTML, CSS, Js';
-  String _language = 'English, Yoruba, French';
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _dateOfBirthController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneNoController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-  List _work = [];
-  List _education = [];
-  List _certification = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isShowPasswordChecked = true;
+  String _name = '';
+  String _email = '';
 
-  doUpdate() {}
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _addressController.dispose();
+    _dateOfBirthController.dispose();
+    _fullNameController.dispose();
+    _phoneNoController.dispose();
+    _confirmPasswordController.dispose();
+
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    updateAccountDetails();
+  }
 
+  Future<void> updateAccountDetails() async {
+    final AccountDetails accountDetails = context.read<AuthProvider>().details;
     setState(() {
-      _work.add(
-        {
-          'role': 'Lead Developer',
-          'company': 'Becadel Solutions',
-          'startMonth': 'December',
-          'startYear': '2020',
-          'endMonth': 'December',
-          'endYear': '2021',
-          'workRoles':
-              'Troubleshooting of technical issues to solve problems within a reasonable time frame',
-        },
-      );
-      _work.add(
-        {
-          'role': 'Lead Developer',
-          'company': 'WebEdge Solutions',
-          'startMonth': 'September',
-          'startYear': '2022',
-          'endMonth': 'June',
-          'endYear': '2023',
-          'workRoles': 'Developing complex websites using HTML, CSS and Js'
-        },
-      );
-      _education.add(
-        {
-          'school': 'Federal University of Agriculture, Abeokuta',
-          'startYear': '2017',
-          'endYear': '2023',
-          'degree': 'BSC: Agricultural Engineering',
-        },
-      );
-      _certification.add({
-        'institution': 'Side Hustle',
-        'year': '2017',
-        'certification': 'Certificate of Completion, Mobile Development',
-      });
+      _emailController.text = accountDetails.email ?? '';
+      _fullNameController.text = accountDetails.fullName ?? '';
+      _phoneNoController.text = accountDetails.phoneNumber ?? '';
+      _dateOfBirthController.text = accountDetails.dateOfBirth ?? '';
+      _addressController.text = accountDetails.address ?? '';
+      _email = accountDetails.email ?? '';
+      _name = accountDetails.fullName ?? '';
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context).brightness == Brightness.dark
-        ? SystemChrome.setSystemUIOverlayStyle(
-            const SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.light,
-              systemNavigationBarContrastEnforced: true,
-              systemNavigationBarColor: Colors.transparent,
-              systemNavigationBarIconBrightness: Brightness.light,
-            ),
-          )
-        : SystemChrome.setSystemUIOverlayStyle(
-            const SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.dark,
-              systemNavigationBarContrastEnforced: true,
-              systemNavigationBarColor: Colors.transparent,
-              systemNavigationBarIconBrightness: Brightness.dark,
-            ),
-          );
-
     return Scaffold(
-      body: SizedBox(
-        height: MediaQuery.sizeOf(context).height,
-        child: Column(
-          children: [
-            Container(
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          onRefresh: updateAccountDetails,
+          child: SingleChildScrollView(
+            child: Padding(
               padding: const EdgeInsets.only(
-                left: 15,
-                top: 30,
-                right: 15,
+                top: 20.0,
+                left: 20,
+                right: 20.0,
               ),
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF181818)
-                  : Colors.white,
-              width: double.infinity,
-              height: MediaQuery.sizeOf(context).height * 0.12,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$_fullName\'s CV',
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height * 0.88,
-              child: Scaffold(
-                body: SingleChildScrollView(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          SizedBox(
-                            height: MediaQuery.sizeOf(context).height * 0.15,
-                            width: double.infinity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF14394B).withOpacity(.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Center(
-                                    child: Hero(
-                                      flightShuttleBuilder: (
-                                        flightContext,
-                                        animation,
-                                        flightDirection,
-                                        fromHeroContext,
-                                        toHeroContext,
-                                      ) {
-                                        switch (flightDirection) {
-                                          case HeroFlightDirection.push:
-                                            return Material(
-                                              color: Colors.transparent,
-                                              child: ScaleTransition(
-                                                scale: animation
-                                                    .drive(Tween<double>(
-                                                  begin: 0,
-                                                  end: 1,
-                                                ).chain(CurveTween(
-                                                  curve: Curves.fastOutSlowIn,
-                                                ))),
-                                                child: toHeroContext.widget,
-                                              ),
-                                            );
-
-                                          case HeroFlightDirection.pop:
-                                            return Material(
-                                              color: Colors.transparent,
-                                              child: toHeroContext.widget,
-                                            );
-                                        }
-                                      },
-                                      tag: 'profile',
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            width: 1,
-                                            color:
-                                                Theme.of(context).brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFD4D4D4)
-                                                    : Colors.grey.shade300,
-                                          ),
-                                          shape: BoxShape.circle,
-                                          image: const DecorationImage(
-                                            image: AssetImage(
-                                              'assets/icon/icon.png',
-                                            ),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Container(
-                                    height: 80,
-                                    width: 1,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _fullName,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            _track,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey.shade500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('1'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'About',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _bio,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('2'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Slack Username',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _slackName,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('3'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Github Handle',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _githubHandle,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('4'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Full Name',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _fullName,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('5'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Skills',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _skills,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('6'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Language',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      _language,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('7'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Work Experience',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    child: Column(
-                                      children: [
-                                        for (int i = 0; i < _work.length; i++)
-                                          Flexible(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 5.0),
-                                                  child: Container(
-                                                    width: 7,
-                                                    height: 7,
-                                                    decoration: BoxDecoration(
-                                                      color: Theme.of(context)
-                                                                  .brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.white
-                                                          : Colors.black,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Flexible(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Text(
-                                                                _work[i]
-                                                                    ['role'],
-                                                                style:
-                                                                    const TextStyle(
-                                                                  fontSize: 15,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                ),
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                maxLines: 2,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            const Text(
-                                                              '|',
-                                                              style: TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 5,
-                                                            ),
-                                                            Flexible(
-                                                              child: Text(
-                                                                _work[i]
-                                                                    ['company'],
-                                                                style:
-                                                                    const TextStyle(
-                                                                  fontSize: 15,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                ),
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                maxLines: 2,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${_work[i]['startMonth']} ${_work[i]['startYear']} - ${_work[i]['endMonth']} ${_work[i]['endYear']}',
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                                      .brightness ==
-                                                                  Brightness
-                                                                      .dark
-                                                              ? Colors
-                                                                  .grey.shade500
-                                                              : Colors.grey
-                                                                  .shade600,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      Flexible(
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Row(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  const Text(
-                                                                    '-',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400,
-                                                                    ),
-                                                                  ),
-                                                                  const SizedBox(
-                                                                    width: 5,
-                                                                  ),
-                                                                  Flexible(
-                                                                    fit: FlexFit
-                                                                        .tight,
-                                                                    child: Text(
-                                                                      _work[i][
-                                                                          'workRoles'],
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: Theme.of(context).brightness ==
-                                                                                Brightness.dark
-                                                                            ? Colors.grey.shade300
-                                                                            : Colors.grey.shade800,
-                                                                        fontSize:
-                                                                            14,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('8'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Education',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    child: Column(
-                                      children: [
-                                        for (int i = 0;
-                                            i < _education.length;
-                                            i++)
-                                          Flexible(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 5.0),
-                                                  child: Container(
-                                                    width: 7,
-                                                    height: 7,
-                                                    decoration: BoxDecoration(
-                                                      color: Theme.of(context)
-                                                                  .brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.white
-                                                          : Colors.black,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Flexible(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          _education[i]
-                                                              ['school'],
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 2,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${_education[i]['startYear']} - ${_education[i]['endYear']}',
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                                      .brightness ==
-                                                                  Brightness
-                                                                      .dark
-                                                              ? Colors
-                                                                  .grey.shade500
-                                                              : Colors.grey
-                                                                  .shade600,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      Flexible(
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Text(
-                                                                _education[i]
-                                                                    ['degree'],
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Theme.of(context)
-                                                                              .brightness ==
-                                                                          Brightness
-                                                                              .dark
-                                                                      ? Colors
-                                                                          .grey
-                                                                          .shade300
-                                                                      : Colors
-                                                                          .grey
-                                                                          .shade800,
-                                                                  fontSize: 14,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF353945)
-                                      : Colors.grey.shade300,
-                                ),
-                                child: const Text('9'),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Certifications',
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 15.0,
-                            ),
-                            child: IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 1,
-                                    color: Colors.transparent,
-                                  ),
-                                  const SizedBox(
-                                    width: 25,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    child: Column(
-                                      children: [
-                                        for (int i = 0;
-                                            i < _certification.length;
-                                            i++)
-                                          Flexible(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 5.0),
-                                                  child: Container(
-                                                    width: 7,
-                                                    height: 7,
-                                                    decoration: BoxDecoration(
-                                                      color: Theme.of(context)
-                                                                  .brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.white
-                                                          : Colors.black,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Flexible(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          _certification[i]
-                                                              ['institution'],
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 2,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${_certification[i]['year']}',
-                                                        style: TextStyle(
-                                                          color: Theme.of(context)
-                                                                      .brightness ==
-                                                                  Brightness
-                                                                      .dark
-                                                              ? Colors
-                                                                  .grey.shade500
-                                                              : Colors.grey
-                                                                  .shade600,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      Flexible(
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .start,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Text(
-                                                                _certification[
-                                                                        i][
-                                                                    'certification'],
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Theme.of(context)
-                                                                              .brightness ==
-                                                                          Brightness
-                                                                              .dark
-                                                                      ? Colors
-                                                                          .grey
-                                                                          .shade300
-                                                                      : Colors
-                                                                          .grey
-                                                                          .shade800,
-                                                                  fontSize: 14,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const SizedBox(
-                            height: 50,
-                          ),
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {
-                                // List getState =
-                                //     await Navigator.of(context).push(
-                                //   CupertinoPageRoute(
-                                //     builder: (context) => EditScreen(
-                                //       fullName: _fullName,
-                                //       slackName: _slackName,
-                                //       githubHandle: _githubHandle,
-                                //       bio: _bio,
-                                //       skills: _skills,
-                                //       language: _language,
-                                //       work: _work,
-                                //       education: _education,
-                                //       certification: _certification,
-                                //     ),
-                                //   ),
-                                // );
-                                // setState(() {
-                                //   _fullName = getState[0];
-                                //   _slackName = getState[1];
-                                //   _githubHandle = getState[2];
-                                //   _bio = getState[3];
-                                //   _skills = getState[4];
-                                //   _language = getState[5];
-                                //   _work = getState[6];
-                                //   _education = getState[7];
-                                //   _certification = getState[8];
-                                // });
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF14394B),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: const Text(
-                                  'Edit details',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                        ],
+              child: Builder(builder: (context) {
+                return Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Profile',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(15.w),
+                        height: 100.h,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: LightTheme.primaryColor,
+                            borderRadius: BorderRadius.circular(8)),
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 60.h,
+                              width: 60.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                                image: const DecorationImage(
+                                  image: AssetImage(
+                                    "assets/icon/icon.png",
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 20.w,
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _name,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                                Text(
+                                  _email,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      const Text('Phone Number'),
+                      SizedBox(
+                        height: 6.h,
+                      ),
+                      ExpatTextField(
+                        hint: '09012345678',
+                        readOnly: true,
+                        textEditingController: _phoneNoController,
+                        textInputAction: TextInputAction.next,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required field';
+                          } else if (value.length < 11 || value.length > 11) {
+                            return 'Enter a valid phone number';
+                          }
+                          return null;
+                        },
+                        onClickSuffixIcon: () {
+                          _phoneNoController.text = '';
+                        },
+                        suffixIcon: Icon(
+                          Icons.close,
+                          size: 16.sp,
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      const Text('Date Of Birth'),
+                      SizedBox(
+                        height: 6.h,
+                      ),
+                      ExpatTextField(
+                        textEditingController: _dateOfBirthController,
+                        hint: '01-01-2020',
+                        readOnly: true,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.toString().isEmpty) {
+                            return 'Date of Birth cannot be empty';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      const Text('Address'),
+                      SizedBox(
+                        height: 6.h,
+                      ),
+                      ExpatTextField(
+                        hint: 'Address',
+                        readOnly: true,
+                        textEditingController: _addressController,
+                        textInputAction: TextInputAction.next,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required field';
+                          }
+                          return null;
+                        },
+                        onClickSuffixIcon: () {
+                          _addressController.text = '';
+                        },
+                        suffixIcon: Icon(
+                          Icons.close,
+                          size: 16.sp,
+                        ),
+                        keyboardType: TextInputType.streetAddress,
+                      ),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      ButtonWidget(
+                        onPressed: () async {
+                          await context.push(EditProfileScreen.path);
+                          updateAccountDetails();
+                        },
+                        child: const Text('Edit Profile'),
+                      ),
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: InkWell(
+                          onTap: _logout,
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Logout',
+                              style: LightTheme.textTheme.bodyMedium!.copyWith(
+                                color: AppColor.primaryColor,
+                              ),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20.sp,
+                      ),
+                    ],
                   ),
-                ),
-              ),
+                );
+              }),
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  _logout() async {
+    final form = _formKey.currentState;
+    if (form!.validate()) {
+      try {
+        await context.read<AuthProvider>().logout();
+        await showSuccess('Logout Successful, click ok to continue');
+        Future.delayed(
+          const Duration(
+            milliseconds: 1000,
+          ),
+          () => context.push(LoginScreen.path),
+        );
+      } on Exception catch (e) {
+        showError(e.toString());
+      }
+    }
+  }
+
+  showError(String e) {
+    showExpatErrorDialog(context, e.toString().split(':')[1]);
+  }
+
+  showSuccess(String message) async {
+    await showExpatSuccessDialog(context, message);
   }
 }

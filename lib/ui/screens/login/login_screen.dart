@@ -1,8 +1,13 @@
+import 'package:email_validator/email_validator.dart';
+import 'package:expatswap_task/ui/screens/home/home_screen.dart';
+import 'package:expatswap_task/ui/screens/verification/verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/assets/assets.dart';
+import '../../../core/providers/auth_provider/auth_provider.dart';
 import '../../common/colors.dart';
 import '../../common/text_field.dart';
 import '../../common/widgets.dart';
@@ -30,11 +35,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -51,18 +58,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      height: 67.h,
-                      width: 67.w,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage(
-                            Assets.icon,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 67.h,
+                          width: 67.w,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: AssetImage(Assets.icon),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          fit: BoxFit.cover,
                         ),
-                      ),
+                      ],
                     ),
                     SizedBox(
                       height: 10.h,
@@ -99,6 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
+                          return 'Enter a valid email';
+                        } else if (!EmailValidator.validate(value)) {
                           return 'Enter a valid email';
                         }
                         return null;
@@ -173,8 +186,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 24.sp,
                     ),
                     ButtonWidget(
-                      onPressed: _login,
-                      child: const Text('Login'),
+                      onPressed: authProvider.isLoading ? null : _login,
+                      child: authProvider.isLoading
+                          ? const SizedBox(
+                              width: 24.0,
+                              height: 24.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                                color: Colors.white,
+                              ))
+                          : const Text('Login'),
                     ),
                     SizedBox(
                       height: 40.sp,
@@ -214,6 +235,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _login() async {
     final form = _formKey.currentState;
-    if (form!.validate()) {}
+    if (form!.validate()) {
+      try {
+        final isVerified = await context.read<AuthProvider>().login(
+            email: _emailController.text, password: _passwordController.text);
+
+        if (isVerified) {
+          navigateToHome();
+        } else {
+          navigateToVerification();
+        }
+      } on Exception catch (e) {
+        showError(e.toString());
+      }
+    }
+  }
+
+  showError(String e) {
+    showExpatErrorDialog(context, e.toString().split(':')[1]);
+  }
+
+  navigateToVerification() {
+    context.push(VerificationScreen.path);
+  }
+
+  navigateToHome() {
+    context.go(HomeScreen.path);
   }
 }
